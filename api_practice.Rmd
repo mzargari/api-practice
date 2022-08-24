@@ -1,0 +1,65 @@
+---
+title: "Data Retrieval"
+author: "Michael Zargari"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dataRetrieval)
+library(tidyverse)
+library(metajam)
+library(here)
+```
+
+## Plot the discharge time-series
+
+for the Ventura River from 2019-10-01 to 2020-10-05
+
+```{r}
+# Choptank River near Greensboro, MD:
+siteNumber <- "01491000"
+parameterCd <- "00060"  # Discharge
+startDate <- "2019-10-01"  
+endDate <- "2020-10-05" 
+
+discharge <- renameNWISColumns(readNWISdv(siteNumber, 
+                    parameterCd, startDate, endDate))
+
+ggplot(data = discharge, aes(x = Date
+                             , y = Flow)) +
+  geom_point() +
+  geom_line()
+```
+
+```{r}
+data_obj <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3A7fc6f6db-c5ea-426a-a743-1f2edafb43b8"
+path <- getwd() 
+# download data and metadata
+download_d1_data(data_obj, path)
+```
+
+```{r}
+my_data <- read_d1_files(here("doi_10.5063_F1CJ8BPH__household_language__csv"))
+
+languages <- my_data$data
+```
+
+Write a piece of code that will compute the percentage of Alaskan household speaking only English for the year 2009 to 2015
+
+```{r}
+summary_table <- languages %>% 
+  filter(Year %in% 2009:2015) %>% 
+  group_by(Year, sum(total), sum(speak_only_english)) %>% 
+  summarise(Year, speak_only_english)
+
+View(summary_table)
+```
+
+mutate(percent_speaking_english = (speak_only_english / total)) %\>%
+
+relocate(percent_speaking_english, .after = lng) %\>%
